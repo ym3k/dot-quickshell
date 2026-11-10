@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import Quickshell.Services.Mpris
@@ -12,6 +13,201 @@ ShellRoot {
 
     property bool idleInhibit: false
     property string submap: ""
+
+    component ClipboardPanel: ColumnLayout {
+        id: clipboardPanel
+
+        required property var panel
+        property var entries: []
+        property string errorMessage: ""
+        property bool confirmingClear: false
+
+        width: 340
+        spacing: 8
+
+        function reloadHistory() {
+            errorMessage = "";
+            historyProcess.running = true;
+        }
+
+        function clearHistory() {
+            errorMessage = "";
+            clearProcess.running = true;
+        }
+
+        function parseHistory(output) {
+            entries = output.split("\n").filter(line => line.length > 0).map(line => {
+                const separator = line.indexOf("\t");
+                return {
+                    entry: line,
+                    preview: separator < 0 ? line : line.slice(separator + 1)
+                };
+            });
+        }
+
+        function copyEntry(entry) {
+            Quickshell.execDetached([
+                "sh", "-c",
+                "printf '%s\\n' \"$1\" | cliphist -db-path \"$XDG_RUNTIME_DIR/quickshell-clipboard.db\" decode | wl-copy",
+                "quickshell-clipboard", entry
+            ]);
+            panel.openPopup = "";
+        }
+
+        Component.onCompleted: reloadHistory()
+
+        Process {
+            id: historyProcess
+            command: ["sh", "-c",
+                "cliphist -db-path \"$XDG_RUNTIME_DIR/quickshell-clipboard.db\" list"]
+            stdout: StdioCollector {
+                onStreamFinished: clipboardPanel.parseHistory(text)
+            }
+            stderr: StdioCollector {
+                onStreamFinished: clipboardPanel.errorMessage = text.trim()
+            }
+        }
+
+        Process {
+            id: clearProcess
+            command: ["sh", "-c",
+                "cliphist -db-path \"$XDG_RUNTIME_DIR/quickshell-clipboard.db\" wipe"]
+            stderr: StdioCollector {
+                onStreamFinished: {
+                    if (text.trim() !== "")
+                        clipboardPanel.errorMessage = text.trim();
+                }
+            }
+            onExited: (exitCode, exitStatus) => {
+                if (exitCode === 0) {
+                    clipboardPanel.confirmingClear = false;
+                    clipboardPanel.reloadHistory();
+                } else if (clipboardPanel.errorMessage === "") {
+                    clipboardPanel.errorMessage = `Could not clear clipboard history (exit code ${exitCode}).`;
+                }
+            }
+        }
+
+        Text {
+            Layout.fillWidth: true
+            text: "Clipboard history"
+            color: Theme.subtle
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize - 1
+        }
+
+        Text {
+            Layout.fillWidth: true
+            visible: clipboardPanel.errorMessage !== ""
+            text: clipboardPanel.errorMessage
+            color: Theme.critical
+            wrapMode: Text.Wrap
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize - 1
+        }
+
+        Text {
+            Layout.fillWidth: true
+            visible: clipboardPanel.entries.length === 0 && clipboardPanel.errorMessage === ""
+            text: "No clipboard history"
+            color: Theme.subtle
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize
+        }
+
+        ListView {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Math.min(contentHeight, 360)
+            clip: true
+            spacing: 2
+            model: clipboardPanel.entries
+
+            delegate: Rectangle {
+                id: entryRow
+                required property var modelData
+
+                width: ListView.view.width
+                implicitHeight: Math.max(Theme.pillHeight, preview.implicitHeight + 12)
+                radius: Theme.radius
+                color: mouse.containsMouse ? Theme.surfaceHover : "transparent"
+
+                Text {
+                    id: preview
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                        margins: 8
+                    }
+                    text: entryRow.modelData.preview || "(空の項目)"
+                    textFormat: Text.PlainText
+                    color: Theme.fg
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    wrapMode: Text.Wrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
+                }
+
+                MouseArea {
+                    id: mouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: clipboardPanel.copyEntry(entryRow.modelData.entry)
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: Theme.surfaceHover
+        }
+
+        MenuItem {
+            label: "Refresh history"
+            onClicked: clipboardPanel.reloadHistory()
+        }
+
+        MenuItem {
+            visible: !clipboardPanel.confirmingClear
+            label: "Clear history"
+            danger: true
+            onClicked: clipboardPanel.confirmingClear = true
+        }
+
+        Text {
+            Layout.fillWidth: true
+            visible: clipboardPanel.confirmingClear
+            text: "This permanently deletes all clipboard history. Continue?"
+            color: Theme.critical
+            wrapMode: Text.Wrap
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize - 1
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            visible: clipboardPanel.confirmingClear
+
+            MenuItem {
+                label: "Cancel"
+                onClicked: clipboardPanel.confirmingClear = false
+            }
+            MenuItem {
+                label: "Delete all"
+                danger: true
+                onClicked: clipboardPanel.clearHistory()
+            }
+        }
+    }
+
+    Process {
+        command: ["wl-paste", "--watch", "sh", "-c",
+            "cliphist -db-path \"$XDG_RUNTIME_DIR/quickshell-clipboard.db\" store"]
+        running: true
+    }
 
     Connections {
         target: Hyprland
@@ -213,6 +409,13 @@ ShellRoot {
                           : "transparent"
                     }
 
+                    BarModule {
+                        id: clipboardModule
+                        label: Theme.icons.clipboard
+                        bg: win.openPopup === "clipboard" ? Theme.accent : Theme.surface
+                        onClicked: win.toggle("clipboard")
+                    }
+
                     Battery {}
 
                     // clock（クリックでカレンダー）
@@ -264,6 +467,15 @@ ShellRoot {
                     target: clockModule
                     panel: win
                     CalendarView {}
+                }
+            }
+
+            LazyLoader {
+                active: win.openPopup === "clipboard"
+                Popup {
+                    target: clipboardModule
+                    panel: win
+                    ClipboardPanel { panel: win }
                 }
             }
         }
