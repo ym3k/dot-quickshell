@@ -79,7 +79,7 @@ Singleton {
         bluetooth: "\uf294",
         mic: "\uf130", micMuted: "\uf131",
         // Nerd Font (MDI) Wi-Fi signal strength: 1–4 bars
-        wifi: ["\udb82\udd1f", "\udb82\udd22", "\udb82\udd25", "\udb82\udd28"], ethernet: "\uf796",
+        wifi: ["\udb82\udd1f", "\udb82\udd22", "\udb82\udd25", "\udb82\udd28"], ethernet: "\udb80\ude00",
         cpu: "\uf2db",
         memory: "\uf0c9",
         temperature: ["\uf2cb", "\uf2c9", "\uf2c7"],
