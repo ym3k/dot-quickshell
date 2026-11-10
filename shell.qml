@@ -36,7 +36,7 @@ ShellRoot {
         }
 
         function parseHistory(output) {
-            entries = output.split("\n").filter(line => line.length > 0).map(line => {
+            entries = output.split("\n").filter(line => line.length > 0).slice(0, 10).map(line => {
                 const separator = line.indexOf("\t");
                 return {
                     entry: line,
