@@ -14,7 +14,7 @@ Rectangle {
     implicitWidth: row.implicitWidth + Theme.padding * 2
     implicitHeight: Theme.pillHeight
     radius: Theme.radius
-    color: Theme.tray
+    color: "transparent"
 
     Row {
         id: row

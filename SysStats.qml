@@ -51,11 +51,50 @@ Singleton {
 
     property var lastCpu: null
 
-    // 輝度変更（brightnessctl が必要）。表示は先に更新し、次のポーリングで補正
+    property string backlightError: ""
+    property int pendingBacklight: -1
+    property int requestedBacklight: 0
+
     function changeBacklight(up) {
+        setBacklight(backlight + (up ? 5 : -5));
+    }
+
+    function setBacklight(percent) {
         if (backlight < 0) return;
-        Quickshell.execDetached(["brightnessctl", "set", up ? "5%+" : "5%-"]);
-        backlight = Math.max(0, Math.min(100, backlight + (up ? 5 : -5)));
+        const value = Math.max(0, Math.min(100, Math.round(percent)));
+        if (value === backlight) return;
+        backlight = value;
+        backlightError = "";
+        pendingBacklight = value;
+        applyBacklight();
+    }
+
+    function applyBacklight() {
+        if (backlightProcess.running || pendingBacklight < 0) return;
+        requestedBacklight = pendingBacklight;
+        pendingBacklight = -1;
+        backlightProcess.running = true;
+    }
+
+    Process {
+        id: backlightProcess
+        command: ["brightnessctl", "--device=" + root.backlightDir.split("/").pop(),
+                  "set", root.requestedBacklight + "%"]
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.trim() !== "") console.warn("brightnessctl: " + text.trim());
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0 || exitStatus !== 0) {
+                root.backlightError = "Failed to set brightness.";
+                console.warn("brightnessctl failed: exit code " + exitCode + ", status " + exitStatus);
+            }
+            if (root.pendingBacklight >= 0)
+                Qt.callLater(root.applyBacklight);
+            else
+                backlightFile.reload();
+        }
     }
 
     FileView {
@@ -123,7 +162,7 @@ Singleton {
         id: backlightFile
         path: root.backlightDir ? root.backlightDir + "/actual_brightness" : ""
         onLoaded: {
-            if (root.backlightMax > 0)
+            if (root.backlightMax > 0 && !backlightProcess.running && root.pendingBacklight < 0)
                 root.backlight = Math.round(100 * Number(text()) / root.backlightMax);
         }
     }
@@ -145,7 +184,7 @@ Singleton {
     // 輝度（ファイルを読むだけなので軽い。キー操作が早めに反映されるよう 2 秒）
     Timer {
         interval: 2000
-        running: root.backlightDir !== ""
+        running: root.backlightDir !== "" && !backlightProcess.running && root.pendingBacklight < 0
         repeat: true
         onTriggered: backlightFile.reload()
     }

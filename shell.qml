@@ -391,11 +391,13 @@ ShellRoot {
                         bg: t >= 80 ? Theme.critical : Theme.temperature
                     }
 
-                    // backlight（ホイールで輝度）
+                    // backlight（クリックでパネル、ホイールで輝度）
                     BarModule {
+                        id: backlightModule
                         visible: SysStats.backlight >= 0
                         label: `${SysStats.backlight}% ${Theme.pick(Theme.icons.backlight, SysStats.backlight)}`
                         bg: Theme.backlight
+                        onClicked: button => { if (button === Qt.LeftButton) win.toggle("backlight"); }
                         onScrolled: delta => SysStats.changeBacklight(delta > 0)
                     }
 
@@ -409,13 +411,6 @@ ShellRoot {
                           : "transparent"
                     }
 
-                    BarModule {
-                        id: clipboardModule
-                        label: Theme.icons.clipboard
-                        bg: win.openPopup === "clipboard" ? Theme.accent : Theme.surface
-                        onClicked: win.toggle("clipboard")
-                    }
-
                     Battery {}
 
                     // clock（クリックでカレンダー）
@@ -424,6 +419,13 @@ ShellRoot {
                         label: Qt.formatDateTime(clock.date, "yyyy-MM-dd\u2009hh:mm")
                         bg: Theme.clock
                         onClicked: win.toggle("calendar")
+                    }
+
+                    BarModule {
+                        id: clipboardModule
+                        label: Theme.icons.clipboard
+                        bg: win.openPopup === "clipboard" ? Theme.accent : Theme.surface
+                        onClicked: win.toggle("clipboard")
                     }
 
                     Tray { panel: win }
@@ -437,6 +439,54 @@ ShellRoot {
                     target: audioModule
                     panel: win
                     AudioPanel { panel: win }
+                }
+            }
+
+            LazyLoader {
+                active: win.openPopup === "backlight" && backlightModule.visible
+                Popup {
+                    target: backlightModule
+                    panel: win
+                    ColumnLayout {
+                        width: 300
+                        spacing: 8
+
+                        Text {
+                            text: "Brightness"
+                            color: Theme.subtle
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 1
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            IconText {
+                                text: Theme.pick(Theme.icons.backlight, SysStats.backlight)
+                            }
+                            Slider {
+                                Layout.fillWidth: true
+                                value: SysStats.backlight / 100
+                                onMoved: v => SysStats.setBacklight(v * 100)
+                            }
+                            Text {
+                                Layout.preferredWidth: 38
+                                horizontalAlignment: Text.AlignRight
+                                text: SysStats.backlight + "%"
+                                color: Theme.fg
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize
+                            }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            visible: SysStats.backlightError !== ""
+                            text: SysStats.backlightError
+                            color: Theme.critical
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 1
+                            wrapMode: Text.Wrap
+                        }
+                    }
                 }
             }
 
