@@ -25,7 +25,7 @@ BarModule {
                    : plugged ? Theme.icons.plugged
                    : Theme.pick(Theme.icons.battery, pct);
         const value = showTime ? formatTime(charging ? dev.timeToFull : dev.timeToEmpty) : pct + "%";
-        return `${value} ${icon}`;
+        return `${value} <span style="font-size: 18px;">${icon}</span>`;
     }
 
     bg: critical ? (blink ? Theme.fg : Theme.disconnected)

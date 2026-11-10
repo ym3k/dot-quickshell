@@ -82,11 +82,11 @@ Singleton {
         wifi: ["\udb82\udd1f", "\udb82\udd22", "\udb82\udd25", "\udb82\udd28"], ethernet: "\uf796",
         cpu: "\uf2db",
         memory: "\uf0c9",
-        temperature: ["\uf76b", "\uf2c9", "\uf769"],
+        temperature: ["\uf2cb", "\uf2c9", "\uf2c7"],
         backlight: ["\ue38d", "\ue3d3", "\ue3d1", "\ue3cf", "\ue3ce", "\ue3cd", "\ue3ca", "\ue3c8", "\ue39b"],
         profile: { "performance": "\uf0e7", "balanced": "\uf24e", "low-power": "\uf06c", "default": "\uf0e7" },
         battery: ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"],
-        charging: "\uf5e7", plugged: "\uf1e6",
+        charging: "\udb80\udc84", plugged: "\uf1e6",
         check: "\udb80\udd2c", lock: "\udb80\udf3e", settings: "\uf013",   // check / lock は Nerd Font (MDI)
         left: "\uf053", right: "\uf054"
     })

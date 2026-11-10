@@ -176,20 +176,22 @@ ShellRoot {
                     // cpu / memory（クリックで btop）
                     BarModule {
                         label: `${SysStats.cpu}% ${Theme.icons.cpu}`
-                        bg: Theme.cpu
+                        bg: SysStats.cpu > 95 ? Theme.critical : Theme.cpu
                         fg: Theme.dark
                         onClicked: Quickshell.execDetached(["kitty", "htop"])
                     }
                     BarModule {
                         label: `${SysStats.memory}% ${Theme.icons.memory}`
-                        bg: Theme.memory
+                        bg: SysStats.memory > 95 ? Theme.critical : Theme.memory
                         onClicked: Quickshell.execDetached(["kitty", "htop"])
                     }
 
                     // temperature
                     BarModule {
                         readonly property int t: SysStats.temperature
-                        label: `${t}°C ${Theme.pick(Theme.icons.temperature, t)}`
+                        readonly property string icon: t < 50 ? Theme.icons.temperature[0]
+                            : t < 70 ? Theme.icons.temperature[1] : Theme.icons.temperature[2]
+                        label: `${t}°C ${icon}`
                         bg: t >= 80 ? Theme.critical : Theme.temperature
                     }
 
