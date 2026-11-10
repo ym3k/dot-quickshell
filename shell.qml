@@ -178,7 +178,7 @@ ShellRoot {
                         label: `${SysStats.cpu}% ${Theme.icons.cpu}`
                         bg: SysStats.cpu > 95 ? Theme.critical : Theme.cpu
                         fg: Theme.dark
-                        onClicked: Quickshell.execDetached(["kitty", "htop"])
+                        onClicked: Quickshell.execDetached(["kitty", "btop"])
                     }
                     BarModule {
                         label: `${SysStats.memory}% ${Theme.icons.memory}`
