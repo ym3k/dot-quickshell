@@ -38,7 +38,7 @@ Rectangle {
             elide: Text.ElideRight
             text: root.label
             color: Theme.fg
-            font.family: Theme.fontFamilies
+            font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize
         }
     }

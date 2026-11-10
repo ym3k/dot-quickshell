@@ -142,9 +142,9 @@ ShellRoot {
                             ?? Theme.pick(Theme.icons.volume, vol)
 
                         // format / format-muted / format-bluetooth / format-bluetooth-muted
-                        label: muted ? (bt ? `${Theme.icons.volumeMuted} ${icon}${Theme.icons.bluetooth}   ${src}`
-                                           : `${Theme.icons.volumeMuted}   ${src}`)
-                                     : `${vol}% ${icon}${bt ? Theme.icons.bluetooth : ""}   ${src}`
+                        label: muted ? (bt ? `${Theme.icons.volumeMuted} ${icon}${Theme.icons.bluetooth}\u2009${src}`
+                                           : `${Theme.icons.volumeMuted}\u2009${src}`)
+                                     : `${vol}% ${icon}${bt ? Theme.icons.bluetooth : ""}\u2009${src}`
                         bg: muted ? Theme.muted : Theme.pulseaudio
                         fg: muted ? Theme.mutedFg : Theme.dark
                         hoverBg: Theme.pulseaudioHover
@@ -163,7 +163,7 @@ ShellRoot {
                     // network（左: Wi‑Fi パネル、右: nmtui）
                     BarModule {
                         id: netModule
-                        label: SysStats.netType === "wifi" ? `${SysStats.netName} (${SysStats.netSignal}%) ${Theme.icons.wifi}`
+                        label: SysStats.netType === "wifi" ? `${SysStats.netName} (${SysStats.netSignal}%) ${Theme.pick(Theme.icons.wifi, SysStats.netSignal)}`
                              : SysStats.netType === "ethernet" ? `${SysStats.netName} ${Theme.icons.ethernet}`
                              : "Disconnected ⚠"
                         bg: SysStats.netType === "" ? Theme.disconnected : Theme.network
@@ -216,7 +216,7 @@ ShellRoot {
                     // clock（クリックでカレンダー）
                     BarModule {
                         id: clockModule
-                        label: Qt.formatDateTime(clock.date, "yyyy-MM-dd   hh:mm")
+                        label: Qt.formatDateTime(clock.date, "yyyy-MM-dd\u2009hh:mm")
                         bg: Theme.clock
                         onClicked: win.toggle("calendar")
                     }

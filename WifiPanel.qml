@@ -53,7 +53,7 @@ ColumnLayout {
 
     component Heading: Text {
         color: Theme.subtle
-        font.family: Theme.fontFamilies
+        font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSize - 1
     }
 
@@ -184,7 +184,7 @@ ColumnLayout {
                 verticalAlignment: TextInput.AlignVCenter
                 echoMode: TextInput.Password
                 color: Theme.fg
-                font.family: Theme.fontFamilies
+                font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 clip: true
 

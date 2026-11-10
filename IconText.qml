@@ -13,7 +13,7 @@ Text {
     width: maxTextWidth > 0 ? Math.min(implicitWidth, maxTextWidth) : implicitWidth
     elide: Text.ElideRight
     color: Theme.fg
-    font.family: Theme.fontFamilies
+    font.family: Theme.iconFontFamily
     font.pixelSize: pixelSize
     font.italic: italic
     font.bold: bold

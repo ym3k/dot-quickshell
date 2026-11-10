@@ -37,7 +37,7 @@ PopupWindow {
             anchors.centerIn: parent
             text: root.text
             color: Theme.fg
-            font.family: Theme.fontFamilies
+            font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize
         }
     }

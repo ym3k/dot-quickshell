@@ -31,7 +31,7 @@ ColumnLayout {
             horizontalAlignment: Text.AlignHCenter
             text: `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][root.month]} ${root.year}`
             color: Theme.fg
-            font.family: Theme.fontFamilies
+            font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize + 1
             font.bold: true
             MouseArea {
@@ -57,7 +57,7 @@ ColumnLayout {
                 horizontalAlignment: Text.AlignHCenter
                 text: modelData
                 color: index === 0 ? Theme.sunday : index === 6 ? Theme.saturday : Theme.subtle
-                font.family: Theme.fontFamilies
+                font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize - 1
             }
         }
@@ -83,7 +83,7 @@ ColumnLayout {
                          : parent.index % 7 === 0 ? Theme.sunday
                          : parent.index % 7 === 6 ? Theme.saturday
                          : Theme.fg
-                    font.family: Theme.fontFamilies
+                    font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize
                     font.bold: parent.isToday
                 }

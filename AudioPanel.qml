@@ -17,7 +17,7 @@ ColumnLayout {
 
     component Heading: Text {
         color: Theme.subtle
-        font.family: Theme.fontFamilies
+        font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSize - 1
     }
 
@@ -46,13 +46,13 @@ ColumnLayout {
             horizontalAlignment: Text.AlignRight
             text: Math.round((vr.node?.audio?.volume ?? 0) * 100) + "%"
             color: Theme.fg
-            font.family: Theme.fontFamilies
+            font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize
         }
     }
 
     Heading { text: "Volume" }
-    VolumeRow { node: root.sink; icon: Theme.icons.volume[2]; mutedIcon: Theme.icons.volumeMuted }
+    VolumeRow { node: root.sink; icon: Theme.icons.volume[1]; mutedIcon: Theme.icons.volumeMuted }
     VolumeRow { node: root.source; icon: Theme.icons.mic; mutedIcon: Theme.icons.micMuted }
 
     Heading { text: "Output"; Layout.topMargin: 4 }

@@ -29,9 +29,8 @@ Singleton {
     readonly property color performance: "#f53c3c"
     readonly property color powerSaver: "#26A65B"
 
-    // waybar の style.css の font-family と同じ順で評価する
-    // （Qt はカンマ区切りのファミリー名を先頭から順に試す）
-    readonly property string fontFamilies: "Hack, Roboto, Font Awesome 7 Free, Font Awesome 7 Free Solid, Font Awesome 7 Brands, Helvetica, Arial, sans-serif, Hack Nerd Font Propo"
+    readonly property string fontFamily: "Hack"
+    readonly property string iconFontFamily: "Hack Nerd Font Propo"
     readonly property int fontSize: 13
 
     readonly property int height: 36
@@ -71,8 +70,7 @@ Singleton {
         players: { "spotify": "\uf1bc", "mpv": "🎵", "default": "\uf144" },
         paused: "\uf28b", stopped: "\uf28d",
         idleOn: "\uf06e", idleOff: "\uf070",
-        // Nerd Font (Material Design) のスピーカー: low / medium / high
-        volume: ["\udb81\udd7f", "\udb81\udd80", "\udb81\udd7e"], volumeMuted: "\udb81\udd81",   // Nerd Font (MDI) volume_off
+        volume: ["\uf027", "\uf028"], volumeMuted: "\uf026",  // Font Awesome: volume-low / high / off
         // device.form-factor ごとのアイコン
         volumeForm: {
             "headphone": "\uf025", "hands-free": "\uf590", "headset": "\uf590",
@@ -80,7 +78,8 @@ Singleton {
         },
         bluetooth: "\uf294",
         mic: "\uf130", micMuted: "\uf131",
-        wifi: "\uf1eb", ethernet: "\uf796",
+        // Nerd Font (MDI) Wi-Fi signal strength: 1–4 bars
+        wifi: ["\udb82\udd1f", "\udb82\udd22", "\udb82\udd25", "\udb82\udd28"], ethernet: "\uf796",
         cpu: "\uf2db",
         memory: "\uf0c9",
         temperature: ["\uf76b", "\uf2c9", "\uf769"],
