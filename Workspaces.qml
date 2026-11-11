@@ -47,7 +47,8 @@ Rectangle {
             delegate: WorkspaceButton {
                 required property HyprlandWorkspace modelData
                 workspace: modelData
-                visible: modelData.monitor === root.monitor && modelData.name !== "special:magic"
+                // special:sonos（Noson の隠し場所）はバーに出さない
+                visible: modelData.monitor === root.monitor && modelData.name !== "special:magic" && modelData.name !== "special:sonos"
             }
         }
 

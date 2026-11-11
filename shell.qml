@@ -276,10 +276,15 @@ ShellRoot {
                         submap: root.submap
                     }
 
-                    // mpris（左: 再生/停止、右: 次、中: 前）
+                    // mpris（左: パネル、中: 再生/停止、右: Noson の special:sonos を出し入れ、ホイール: 音量）
                     BarModule {
+                        id: mediaModule
+                        // 再生中 → 曲情報のあるプレイヤー の順で選ぶ
+                        // （Sonos が見つからず空のままの Noson が、ほかのプレイヤーを隠さないように）
                         readonly property MprisPlayer player:
-                            Mpris.players.values.find(p => p.isPlaying) ?? Mpris.players.values[0] ?? null
+                            Mpris.players.values.find(p => p.isPlaying)
+                            ?? Mpris.players.values.find(p => p.trackTitle)
+                            ?? null
                         readonly property string title:
                             player ? [player.trackTitle, player.trackArtist].filter(s => s).join(" - ") : ""
 
@@ -294,9 +299,14 @@ ShellRoot {
 
                         onClicked: button => {
                             if (!player) return;
-                            if (button === Qt.LeftButton) player.togglePlaying();
-                            else if (button === Qt.RightButton) player.next();
-                            else player.previous();
+                            if (button === Qt.LeftButton) win.toggle("media");
+                            // Lua 設定の Hyprland では dispatch に Lua 式を渡す
+                            else if (button === Qt.RightButton) Hyprland.dispatch('hl.dsp.workspace.toggle_special("sonos")');
+                            else player.togglePlaying();
+                        }
+                        onScrolled: delta => {
+                            if (player?.volumeSupported)
+                                player.volume = Math.max(0, Math.min(1, player.volume + (delta > 0 ? 0.05 : -0.05)));
                         }
                     }
                 }
@@ -427,6 +437,15 @@ ShellRoot {
             }
 
             // ── ポップアップ（開いた時だけ生成） ──
+            LazyLoader {
+                active: win.openPopup === "media" && mediaModule.player !== null
+                Popup {
+                    target: mediaModule
+                    panel: win
+                    MediaPanel { panel: win; player: mediaModule.player }
+                }
+            }
+
             LazyLoader {
                 active: win.openPopup === "audio"
                 Popup {

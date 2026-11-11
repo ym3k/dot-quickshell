@@ -67,7 +67,8 @@ Singleton {
     // 各モジュールのアイコン（waybar config.hyprland と同じ）
     readonly property var icons: ({
         // mpris: 再生中はプレイヤーアイコン、一時停止中はステータスアイコン
-        players: { "spotify": "\uf1bc", "mpv": "🎵", "default": "\uf144" },
+        players: { "spotify": "\uf1bc", "mpv": "🎵", "noson": "\udb81\udcc3", "default": "\uf144" },   // noson = Sonos (MDI speaker)
+        prev: "\uf048", play: "\uf04b", pause: "\uf04c", next: "\uf051",
         paused: "\uf28b", stopped: "\uf28d",
         idleOn: "\uf06e", idleOff: "\uf070",
         volume: ["\uf027", "\uf028"], volumeMuted: "\uf026",  // Font Awesome: volume-low / high / off
