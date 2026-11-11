@@ -13,6 +13,7 @@ Rectangle {
     property int maxTextWidth: 0
     property int padding: Theme.padding
     readonly property alias hovered: mouse.containsMouse
+    readonly property bool textTruncated: text.truncated
 
     signal clicked(int button)
     signal scrolled(int delta)

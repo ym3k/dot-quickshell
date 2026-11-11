@@ -6,6 +6,7 @@ Rectangle {
 
     property string icon: ""
     property string label: ""
+    property string tooltipText: ""
     property bool danger: false
     property bool highlighted: false
 
@@ -49,5 +50,13 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: root.clicked()
+    }
+
+    Loader {
+        active: mouse.containsMouse && root.tooltipText !== ""
+        sourceComponent: Tooltip {
+            target: root
+            text: root.tooltipText
+        }
     }
 }

@@ -447,6 +447,14 @@ ShellRoot {
             }
 
             LazyLoader {
+                active: mediaModule.hovered && mediaModule.textTruncated && win.openPopup === ""
+                Tooltip {
+                    target: mediaModule
+                    text: mediaModule.title
+                }
+            }
+
+            LazyLoader {
                 active: win.openPopup === "audio"
                 Popup {
                     target: audioModule
