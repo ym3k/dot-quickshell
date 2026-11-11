@@ -7,7 +7,28 @@ Rectangle {
     id: root
 
     required property var targetScreen
+    property string submap: ""
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(targetScreen)
+
+    component WorkspaceButton: BarModule {
+        required property HyprlandWorkspace workspace
+        readonly property bool special: workspace.name.startsWith("special:")
+        readonly property string name: special ? workspace.name.slice(8) : workspace.name
+
+        implicitHeight: Theme.pillHeight - 4
+        padding: 7
+        label: `${name} ${workspace.urgent ? Theme.workspaceIcons["urgent"]
+                           : Theme.workspaceIcons[name] ?? Theme.workspaceIcons["default"]}`
+        italic: special
+        bg: workspace.urgent ? Theme.critical
+          : workspace.focused ? Theme.wsFocused
+          : workspace.active ? Theme.surface
+          : "transparent"
+        fg: workspace.focused || workspace.active || workspace.urgent ? Theme.fg : Theme.subtle
+
+        // special は表示のみ
+        onClicked: if (!special) workspace.activate()
+    }
 
     Layout.alignment: Qt.AlignVCenter
     implicitWidth: row.implicitWidth + 4
@@ -23,28 +44,28 @@ Rectangle {
         Repeater {
             model: Hyprland.workspaces
 
-            delegate: BarModule {
-                id: ws
-
+            delegate: WorkspaceButton {
                 required property HyprlandWorkspace modelData
-                readonly property bool special: modelData.name.startsWith("special:")
-                readonly property string name: special ? modelData.name.slice(8) : modelData.name
-
-                visible: modelData.monitor === root.monitor
-                implicitHeight: Theme.pillHeight - 4
-                padding: 7
-                label: `${name} ${modelData.urgent ? Theme.workspaceIcons["urgent"]
-                                   : Theme.workspaceIcons[name] ?? Theme.workspaceIcons["default"]}`
-                italic: special
-                bg: modelData.urgent ? Theme.critical
-                  : modelData.focused ? Theme.wsFocused
-                  : modelData.active ? Theme.surface
-                  : "transparent"
-                fg: modelData.focused || modelData.active || modelData.urgent ? Theme.fg : Theme.subtle
-
-                // special は表示のみ
-                onClicked: if (!special) modelData.activate()
+                workspace: modelData
+                visible: modelData.monitor === root.monitor && modelData.name !== "special:magic"
             }
+        }
+
+        Repeater {
+            model: Hyprland.workspaces
+
+            delegate: WorkspaceButton {
+                required property HyprlandWorkspace modelData
+                workspace: modelData
+                visible: modelData.monitor === root.monitor && modelData.name === "special:magic"
+            }
+        }
+
+        BarModule {
+            visible: root.submap !== ""
+            label: root.submap
+            italic: true
+            bg: Theme.critical
         }
     }
 }

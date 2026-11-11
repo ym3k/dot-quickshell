@@ -271,7 +271,10 @@ ShellRoot {
                     anchors { left: parent.left; leftMargin: 4; verticalCenter: parent.verticalCenter }
                     spacing: Theme.spacing
 
-                    Workspaces { targetScreen: win.modelData }
+                    Workspaces {
+                        targetScreen: win.modelData
+                        submap: root.submap
+                    }
 
                     // mpris（左: 再生/停止、右: 次、中: 前）
                     BarModule {
@@ -296,15 +299,6 @@ ShellRoot {
                             else player.previous();
                         }
                     }
-                }
-
-                // ── 中央：submap ──
-                BarModule {
-                    anchors.centerIn: parent
-                    visible: root.submap !== ""
-                    label: root.submap
-                    italic: true
-                    bg: Theme.critical
                 }
 
                 // ── 右 ──
