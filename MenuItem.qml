@@ -16,7 +16,7 @@ Rectangle {
     implicitWidth: row.implicitWidth + 20
     implicitHeight: 30
     radius: Theme.radius
-    color: highlighted ? Theme.critical
+    color: highlighted ? Theme.surfaceHover
          : mouse.containsMouse ? (danger ? Qt.rgba(235 / 255, 77 / 255, 75 / 255, 0.5) : Theme.surfaceHover)
          : "transparent"
     Behavior on color { ColorAnimation { duration: Theme.animMs } }

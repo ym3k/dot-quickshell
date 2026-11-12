@@ -79,7 +79,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     text: parent.d.getDate()
                     opacity: parent.inMonth ? 1 : 0.35
-                    color: parent.isToday ? Theme.fg
+                    color: parent.isToday ? Theme.onAccent
                          : parent.index % 7 === 0 ? Theme.sunday
                          : parent.index % 7 === 6 ? Theme.saturday
                          : Theme.fg

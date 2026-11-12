@@ -4,6 +4,7 @@ Rectangle {
     id: root
 
     property string text: ""
+    property color textColor: Theme.fg
     signal clicked()
 
     implicitWidth: 26
@@ -15,7 +16,7 @@ Rectangle {
     Text {
         anchors.centerIn: parent
         text: root.text
-        color: Theme.fg
+        color: root.textColor
         font.family: Theme.iconFontFamily
         font.pixelSize: Theme.fontSize
     }

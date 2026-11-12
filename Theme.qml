@@ -1,33 +1,108 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
-// Waybar の style.css に合わせた色・フォント
+// 配色: Material 3 風のダーク（end_4 風）。ベース色はバーの空き部分の右クリックで切り替え
 Singleton {
-    readonly property color barBg: Qt.rgba(43 / 255, 48 / 255, 59 / 255, 0.75)
-    readonly property color barBorder: Qt.rgba(100 / 255, 114 / 255, 125 / 255, 0.5)
-    readonly property color fg: "#ffffff"
-    readonly property color dark: "#000000"
+    id: theme
 
-    readonly property color clock: "#64727D"
-    readonly property color cpu: "#2ecc71"
-    readonly property color memory: "#9b59b6"
-    readonly property color temperature: "#f0932b"
-    readonly property color critical: "#eb4d4b"
-    readonly property color backlight: "#90b1b1"
-    readonly property color network: "#2980b9"
-    readonly property color disconnected: "#f53c3c"
-    readonly property color pulseaudio: "#f1c40f"
-    readonly property color pulseaudioHover: "#a37800"
-    readonly property color muted: "#90b1b1"
-    readonly property color mutedFg: "#2a5c45"
-    readonly property color tray: "#2980b9"
-    readonly property color idle: "#2d3436"
-    readonly property color idleOn: "#ecf0f1"
-    readonly property color battery: "#ffffff"
-    readonly property color charging: "#26A65B"
-    readonly property color performance: "#f53c3c"
-    readonly property color powerSaver: "#26A65B"
+    // ── ベース色（teal / rose / lavender）。選択は state ディレクトリに保存 ──
+    property string base: "lavender"
+    readonly property var baseNames: ["teal", "rose", "lavender"]
+    readonly property var bases: ({
+        teal: {
+            label: "Teal",
+            bar: "#d90e1514", c: "#1a2120", ch: "#252b2a", fg: "#dde4e2", sub: "#bec9c7", outline: "#3f4948",
+            p: "#80d5cf", op: "#003735", pc: "#00504c", opc: "#9cf2eb", sc: "#324b49", osc: "#cce8e5",
+            popup: "#f50e1514"
+        },
+        rose: {
+            label: "Rose",
+            bar: "#d9191113", c: "#261d1f", ch: "#31282a", fg: "#f0dee0", sub: "#d5c2c5", outline: "#524345",
+            p: "#ffb1c3", op: "#5e1130", pc: "#7b2946", opc: "#ffd9e0", sc: "#5a3f45", osc: "#ffd9e0",
+            popup: "#f5191113"
+        },
+        lavender: {
+            label: "Lavender",
+            bar: "#d9141318", c: "#211f26", ch: "#2b2930", fg: "#e6e0e9", sub: "#cac4d0", outline: "#49454f",
+            p: "#d0bcff", op: "#381e72", pc: "#4f378b", opc: "#eaddff", sc: "#4a4458", osc: "#e8def8",
+            popup: "#f5141318"
+        }
+    })
+    readonly property var b: bases[base] ?? bases.lavender
+
+    function setBase(name) {
+        if (!bases[name]) return;
+        base = name;
+        baseStore.setText(name);
+    }
+
+    FileView {
+        id: baseStore
+        path: Quickshell.statePath("theme-base")
+        printErrors: false
+        onLoaded: {
+            const v = text().trim();
+            if (theme.bases[v]) theme.base = v;
+        }
+    }
+
+    // ── 共通（ベース色から） ──
+    readonly property color barBg: b.bar
+    readonly property color barBorder: b.outline
+    readonly property color fg: b.fg
+    readonly property color subtle: b.sub
+    readonly property color dark: b.op
+    readonly property color surface: b.c
+    readonly property color surfaceHover: b.ch
+    readonly property color popupBg: b.popup
+    readonly property color accent: b.p
+    readonly property color onAccent: b.op
+
+    readonly property color wsFocused: b.p
+    readonly property color wsFocusedFg: b.op
+    readonly property color clock: b.pc
+    readonly property color clockFg: b.opc
+    readonly property color media: b.sc
+    readonly property color mediaFg: b.osc
+    readonly property color tray: b.c
+    readonly property color idle: b.c
+    readonly property color idleFg: b.sub
+    readonly property color idleOn: b.p
+    readonly property color idleOnFg: b.op
+    readonly property color muted: b.ch
+    readonly property color mutedFg: b.sub
+
+    // ── 警告（どのベースでも共通） ──
+    readonly property color critical: "#ffb4ab"
+    readonly property color criticalFg: "#690005"
+    readonly property color disconnected: critical
+    readonly property color performance: critical
+    readonly property color performanceFg: criticalFg
+
+    // ── モジュールごとの色分け（案 D: 淡いトーン、どのベースでも共通） ──
+    readonly property color pulseaudio: "#3d3420"
+    readonly property color pulseaudioFg: "#f5d98a"
+    readonly property color pulseaudioHover: "#52462b"
+    readonly property color network: "#1f3346"
+    readonly property color networkFg: "#a8cdf0"
+    readonly property color cpu: "#1e3826"
+    readonly property color cpuFg: "#a6e3b5"
+    readonly property color memory: "#35263f"
+    readonly property color memoryFg: "#dcbcf0"
+    readonly property color temperature: "#40291a"
+    readonly property color temperatureFg: "#f5c08f"
+    readonly property color backlight: "#263534"
+    readonly property color backlightFg: "#b9d6d4"
+    readonly property color battery: b.c
+    readonly property color batteryFg: b.fg
+    readonly property color charging: "#1e3826"
+    readonly property color chargingFg: "#a6e3b5"
+    readonly property color powerSaver: "#1e3826"
+    readonly property color powerSaverFg: "#a6e3b5"
+
+    // カレンダー
 
     readonly property string fontFamily: "Hack"
     readonly property string iconFontFamily: "Hack Nerd Font Propo"
@@ -41,12 +116,6 @@ Singleton {
     readonly property int barMargin: 6          // 画面端からの余白
     readonly property int radius: 7
     readonly property int pillHeight: 26
-    readonly property color surface: Qt.rgba(1, 1, 1, 0.06)
-    readonly property color surfaceHover: Qt.rgba(1, 1, 1, 0.14)
-    readonly property color popupBg: Qt.rgba(43 / 255, 48 / 255, 59 / 255, 0.96)
-    readonly property color accent: "#2980b9"
-    readonly property color subtle: "#9aa5b1"
-    readonly property color wsFocused: "#64727D"
     readonly property color sunday: "#f56c6c"
     readonly property color saturday: "#5dade2"
     readonly property int animMs: 150

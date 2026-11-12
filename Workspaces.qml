@@ -24,7 +24,10 @@ Rectangle {
           : workspace.focused ? Theme.wsFocused
           : workspace.active ? Theme.surface
           : "transparent"
-        fg: workspace.focused || workspace.active || workspace.urgent ? Theme.fg : Theme.subtle
+        fg: workspace.urgent ? Theme.criticalFg
+          : workspace.focused ? Theme.wsFocusedFg
+          : workspace.active ? Theme.fg
+          : Theme.subtle
 
         // special は表示のみ
         onClicked: if (!special) workspace.activate()
@@ -67,6 +70,7 @@ Rectangle {
             label: root.submap
             italic: true
             bg: Theme.critical
+            fg: Theme.criticalFg
         }
     }
 }

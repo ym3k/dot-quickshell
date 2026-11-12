@@ -266,6 +266,23 @@ ShellRoot {
                 border.width: 1
                 border.color: Theme.barBorder
 
+                // 空き部分の右クリックでベース色メニュー（モジュール上のクリックはモジュールが受け取る）
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.RightButton
+                    onClicked: e => {
+                        themeAnchor.x = e.x;
+                        win.toggle("theme");
+                    }
+                }
+
+                // メニューの表示位置（クリックした場所）
+                Item {
+                    id: themeAnchor
+                    width: 1
+                    height: parent.height
+                }
+
                 // ── 左 ──
                 RowLayout {
                     anchors { left: parent.left; leftMargin: 4; verticalCenter: parent.verticalCenter }
@@ -296,6 +313,8 @@ ShellRoot {
                         }
                         label: `${player?.isPlaying ? playerIcon : Theme.icons.paused} ${title}`
                         maxTextWidth: 300
+                        bg: Theme.media
+                        fg: Theme.mediaFg
 
                         onClicked: button => {
                             if (!player) return;
@@ -320,7 +339,7 @@ ShellRoot {
                     BarModule {
                         label: root.idleInhibit ? Theme.icons.idleOn : Theme.icons.idleOff
                         bg: root.idleInhibit ? Theme.idleOn : Theme.idle
-                        fg: root.idleInhibit ? Theme.idle : Theme.fg
+                        fg: root.idleInhibit ? Theme.idleOnFg : Theme.idleFg
                         onClicked: root.idleInhibit = !root.idleInhibit
                     }
 
@@ -346,7 +365,7 @@ ShellRoot {
                                            : `${Theme.icons.volumeMuted}\u2009${src}`)
                                      : `${vol}% ${icon}${bt ? Theme.icons.bluetooth : ""}\u2009${src}`
                         bg: muted ? Theme.muted : Theme.pulseaudio
-                        fg: muted ? Theme.mutedFg : Theme.dark
+                        fg: muted ? Theme.mutedFg : Theme.pulseaudioFg
                         hoverBg: Theme.pulseaudioHover
 
                         onClicked: button => {
@@ -367,6 +386,7 @@ ShellRoot {
                              : SysStats.netType === "ethernet" ? `${SysStats.netName} ${Theme.icons.ethernet}`
                              : "Disconnected ⚠"
                         bg: SysStats.netType === "" ? Theme.disconnected : Theme.network
+                        fg: SysStats.netType === "" ? Theme.criticalFg : Theme.networkFg
                         onClicked: button => {
                             if (button === Qt.RightButton) Quickshell.execDetached(["kitty", "nmtui"]);
                             else win.toggle("wifi");
@@ -377,12 +397,13 @@ ShellRoot {
                     BarModule {
                         label: `${SysStats.cpu}% ${Theme.icons.cpu}`
                         bg: SysStats.cpu > 95 ? Theme.critical : Theme.cpu
-                        fg: Theme.dark
+                        fg: SysStats.cpu > 95 ? Theme.criticalFg : Theme.cpuFg
                         onClicked: Quickshell.execDetached(["kitty", "btop"])
                     }
                     BarModule {
                         label: `${SysStats.memory}% ${Theme.icons.memory}`
                         bg: SysStats.memory > 95 ? Theme.critical : Theme.memory
+                        fg: SysStats.memory > 95 ? Theme.criticalFg : Theme.memoryFg
                         onClicked: Quickshell.execDetached(["kitty", "htop"])
                     }
 
@@ -393,6 +414,7 @@ ShellRoot {
                             : t < 70 ? Theme.icons.temperature[1] : Theme.icons.temperature[2]
                         label: `${t}°C ${icon}`
                         bg: t >= 80 ? Theme.critical : Theme.temperature
+                        fg: t >= 80 ? Theme.criticalFg : Theme.temperatureFg
                     }
 
                     // backlight（クリックでパネル、ホイールで輝度）
@@ -401,6 +423,7 @@ ShellRoot {
                         visible: SysStats.backlight >= 0
                         label: `${SysStats.backlight}% ${Theme.pick(Theme.icons.backlight, SysStats.backlight)}`
                         bg: Theme.backlight
+                        fg: Theme.backlightFg
                         onClicked: button => { if (button === Qt.LeftButton) win.toggle("backlight"); }
                         onScrolled: delta => SysStats.changeBacklight(delta > 0)
                     }
@@ -413,6 +436,9 @@ ShellRoot {
                         bg: p === "performance" ? Theme.performance
                           : p === "low-power" ? Theme.powerSaver
                           : "transparent"
+                        fg: p === "performance" ? Theme.performanceFg
+                          : p === "low-power" ? Theme.powerSaverFg
+                          : Theme.fg
                     }
 
                     Battery {}
@@ -422,6 +448,7 @@ ShellRoot {
                         id: clockModule
                         label: Qt.formatDateTime(clock.date, "yyyy-MM-dd\u2009hh:mm")
                         bg: Theme.clock
+                        fg: Theme.clockFg
                         onClicked: win.toggle("calendar")
                     }
 
@@ -429,6 +456,7 @@ ShellRoot {
                         id: clipboardModule
                         label: Theme.icons.clipboard
                         bg: win.openPopup === "clipboard" ? Theme.accent : Theme.surface
+                        fg: win.openPopup === "clipboard" ? Theme.onAccent : Theme.fg
                         onClicked: win.toggle("clipboard")
                     }
 
@@ -437,6 +465,15 @@ ShellRoot {
             }
 
             // ── ポップアップ（開いた時だけ生成） ──
+            LazyLoader {
+                active: win.openPopup === "theme"
+                Popup {
+                    target: themeAnchor
+                    panel: win
+                    ThemePicker { panel: win }
+                }
+            }
+
             LazyLoader {
                 active: win.openPopup === "media" && mediaModule.player !== null
                 Popup {

@@ -102,6 +102,7 @@ ColumnLayout {
             implicitWidth: 34
             implicitHeight: 34
             color: Theme.accent
+            textColor: Theme.onAccent
             text: root.player?.isPlaying ? Theme.icons.pause : Theme.icons.play
             onClicked: root.player?.togglePlaying()
         }

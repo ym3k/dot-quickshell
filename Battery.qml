@@ -28,12 +28,12 @@ BarModule {
         return `${value} <span style="font-size: 18px;">${icon}</span>`;
     }
 
-    bg: critical ? (blink ? Theme.fg : Theme.disconnected)
+    bg: critical ? (blink ? Theme.criticalFg : Theme.critical)
       : plugged ? Theme.charging
       : Theme.battery
-    fg: critical ? (blink ? Theme.dark : Theme.fg)
-      : plugged ? Theme.fg
-      : Theme.dark
+    fg: critical ? (blink ? Theme.critical : Theme.criticalFg)
+      : plugged ? Theme.chargingFg
+      : Theme.batteryFg
 
     onClicked: showTime = !showTime
 
