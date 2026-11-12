@@ -12,13 +12,19 @@ Singleton {
     // c: 一段明るい面 / ch: さらに明るい面（ホバー）/ p: アクセント / op: アクセント上の文字
     // pc・opc: 時計など淡いアクセント / sc・osc: 再生中の曲
     property string base: "lavender"
-    readonly property var baseNames: ["teal", "rose", "orange", "lavender", "legacy"]
+    readonly property var baseNames: ["teal", "blue", "rose", "orange", "lavender", "smoke", "legacy"]
     readonly property var bases: ({
         teal: {
             label: "Teal",
             bar: "#d90e1514", c: "#1a2120", ch: "#252b2a", fg: "#dde4e2", sub: "#bec9c7", outline: "#3f4948",
             p: "#80d5cf", op: "#003735", pc: "#00504c", opc: "#9cf2eb", sc: "#324b49", osc: "#cce8e5",
             popup: "#f50e1514"
+        },
+        blue: {
+            label: "Blue",
+            bar: "#d9111318", c: "#1d2024", ch: "#272a2f", fg: "#e2e2e9", sub: "#c4c6d0", outline: "#43474e",
+            p: "#a8c8ff", op: "#05305f", pc: "#254777", opc: "#d6e3ff", sc: "#3e4759", osc: "#dae2f9",
+            popup: "#f5111318"
         },
         rose: {
             label: "Rose",
@@ -37,6 +43,13 @@ Singleton {
             bar: "#d9141318", c: "#211f26", ch: "#2b2930", fg: "#e6e0e9", sub: "#cac4d0", outline: "#49454f",
             p: "#d0bcff", op: "#381e72", pc: "#4f378b", opc: "#eaddff", sc: "#4a4458", osc: "#e8def8",
             popup: "#f5141318"
+        },
+        // ダークの白系（アクセントがグレーがかった白）
+        smoke: {
+            label: "Smoke",
+            bar: "#d9131313", c: "#1f1f1f", ch: "#2a2a2a", fg: "#e6e4e1", sub: "#b5b2ad", outline: "#444240",
+            p: "#d6d3cf", op: "#1e1d1c", pc: "#3f3d3b", opc: "#ece9e5", sc: "#33312f", osc: "#dedad5",
+            popup: "#f5131313"
         },
         // waybar の style.css そのままの配色
         legacy: {

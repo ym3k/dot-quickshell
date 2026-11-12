@@ -39,8 +39,14 @@ Rectangle {
                     } else if (e.button === Qt.MiddleButton) {
                         modelData.secondaryActivate();
                     } else if (modelData.hasMenu) {
-                        const p = item.mapToItem(null, 0, item.height);
-                        modelData.display(root.panel, p.x, p.y);
+                        // テーマに合わせた自前のメニュー（TrayMenu.qml）を開く
+                        if (root.panel.openPopup === "tray" && root.panel.trayItem === modelData) {
+                            root.panel.openPopup = "";
+                        } else {
+                            root.panel.trayItem = modelData;
+                            root.panel.trayTarget = item;
+                            root.panel.openPopup = "tray";
+                        }
                     }
                 }
 

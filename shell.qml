@@ -234,6 +234,8 @@ ShellRoot {
 
             required property var modelData
             property string openPopup: ""   // 開いているポップアップ名（1 つだけ）
+            property var trayItem: null     // メニューを開いているトレイアイテム
+            property Item trayTarget: null  // メニューの表示位置（トレイのアイコン）
 
             function toggle(name) {
                 openPopup = openPopup === name ? "" : name;
@@ -465,6 +467,15 @@ ShellRoot {
             }
 
             // ── ポップアップ（開いた時だけ生成） ──
+            LazyLoader {
+                active: win.openPopup === "tray" && win.trayItem !== null && win.trayTarget !== null
+                Popup {
+                    target: win.trayTarget
+                    panel: win
+                    TrayMenu { panel: win; menu: win.trayItem.menu }
+                }
+            }
+
             LazyLoader {
                 active: win.openPopup === "theme"
                 Popup {
