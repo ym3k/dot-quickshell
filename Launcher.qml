@@ -187,7 +187,7 @@ PanelWindow {
         return Object.keys(used)
             .filter(c => q === "" || c.toLowerCase().includes(q))
             .sort((a, b) => used[b] - used[a])
-            .slice(0, 8);
+            .slice(0, 20);
     }
 
     // keepOpen が true なら実行後も fish を残す（既定はコマンドが終わったら kitty も閉じる）
@@ -583,10 +583,12 @@ PanelWindow {
                 id: runList
                 visible: root.mode === "run" && count > 0
                 Layout.fillWidth: true
-                implicitHeight: contentHeight
-                interactive: false
+                implicitHeight: Math.min(contentHeight, 32 * 10)   // 10 行を超えたらスクロール
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
                 model: root.runResults
                 currentIndex: root.current
+                onCurrentIndexChanged: if (currentIndex >= 0) positionViewAtIndex(currentIndex, ListView.Contain)
 
                 delegate: Rectangle {
                     id: runRow
