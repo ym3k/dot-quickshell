@@ -181,11 +181,23 @@ Singleton {
         }
     }
 
-    // 輝度（ファイルを読むだけなので軽い。キー操作が早めに反映されるよう 2 秒）
+    // 輝度: カーネルが輝度の変更を udev に通知するので、それを受けた時だけ読み直す（定期確認なし）
+    // brightnessctl・キー操作・ほかのアプリ、どこから変えてもすぐ反映される
+    Process {
+        id: backlightWatch
+        running: root.backlightDir !== ""
+        command: ["udevadm", "monitor", "--kernel", "--subsystem-match=backlight"]
+        stdout: SplitParser {
+            onRead: line => {
+                if (line.includes(" change ")) backlightFile.reload();
+            }
+        }
+        onExited: backlightWatchRestart.start()
+    }
+
     Timer {
-        interval: 2000
-        running: root.backlightDir !== "" && !backlightProcess.running && root.pendingBacklight < 0
-        repeat: true
-        onTriggered: backlightFile.reload()
+        id: backlightWatchRestart
+        interval: 5000
+        onTriggered: backlightWatch.running = root.backlightDir !== ""
     }
 }

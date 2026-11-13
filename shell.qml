@@ -222,10 +222,34 @@ ShellRoot {
         objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
     }
 
-    // 時計。Seconds にしておくと、サスペンド復帰後も 1 秒以内に正しい時刻になる
+    // 時計は分単位で更新（毎秒起きないので軽い）
     SystemClock {
         id: clock
-        precision: SystemClock.Seconds
+        precision: SystemClock.Minutes
+    }
+
+    // サスペンドからの復帰を logind の通知で検知して、時計をすぐ更新する
+    // （分単位のタイマーはサスペンド中に止まるため、そのままだと最大 1 分遅れる）
+    Process {
+        id: resumeWatch
+        running: true
+        command: ["dbus-monitor", "--system",
+            "type='signal',interface='org.freedesktop.login1.Manager',member='PrepareForSleep'"]
+        stdout: SplitParser {
+            onRead: line => {
+                if (line.includes("boolean false")) {   // false = 復帰
+                    clock.enabled = false;
+                    clock.enabled = true;
+                }
+            }
+        }
+        onExited: resumeRestart.start()
+    }
+
+    Timer {
+        id: resumeRestart
+        interval: 5000
+        onTriggered: resumeWatch.running = true
     }
 
     // アナログ時計（Hyprland の通常ウィンドウ。window rule で float にする）
@@ -235,6 +259,9 @@ ShellRoot {
             onVisibleChanged: if (!visible) root.analogClock = false   // ウィンドウを閉じたら状態も戻す
         }
     }
+
+    // ランチャー（Mod+D / Mod+Alt+D / Mod+Shift+D。hyprland から qs ipc で呼ぶ）
+    Launcher {}
 
     Variants {
         model: Quickshell.screens

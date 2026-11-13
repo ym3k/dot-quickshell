@@ -224,7 +224,7 @@ return { colors = { "${c[0]}", "${c[1]}" }, angle = 45 }
     readonly property int padding: 10
 
     // デザイン（フローティングバー + 角丸ピル）
-    readonly property int barMargin: 6          // 画面端からの余白
+    readonly property int barMargin: 0          // 画面端からの余白
     readonly property int radius: 7
     readonly property int pillHeight: 26
     readonly property int animMs: 150

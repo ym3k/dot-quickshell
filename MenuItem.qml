@@ -10,6 +10,8 @@ Rectangle {
     property bool danger: false
     property bool highlighted: false
 
+    readonly property alias hovered: mouse.containsMouse
+
     signal clicked()
 
     Layout.fillWidth: true

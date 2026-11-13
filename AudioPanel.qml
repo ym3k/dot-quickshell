@@ -18,6 +18,21 @@ ColumnLayout {
     width: 300
     spacing: 8
 
+    // 出力先の詳細（properties）を読むため、パネル表示中だけ出力先を追跡する
+    PwObjectTracker { objects: root.sinks }
+
+    // ツールチップの内容: どのカードのどの出力（ポート）か
+    function sinkInfo(n) {
+        const p = n.properties ?? {};
+        const lines = [n.description || n.nickname || n.name];
+        if (p["device.profile.description"]) lines.push(`Port: ${p["device.profile.description"]}`);
+        const card = p["alsa.card_name"] ?? p["alsa.long_card_name"];
+        if (card) lines.push(`Card: ${card}` + (p["api.alsa.path"] ? `  (${p["api.alsa.path"]})` : ""));
+        if (p["api.bluez5.address"]) lines.push(`Bluetooth: ${p["api.bluez5.address"]}`);
+        if (p["audio.channels"]) lines.push(`Channels: ${p["audio.channels"]}` + (p["audio.position"] ? `  (${p["audio.position"]})` : ""));
+        return lines.join("\n");
+    }
+
     function reloadProfiles() {
         profileError = "";
         cardsProcess.running = true;
@@ -121,10 +136,24 @@ ColumnLayout {
         Repeater {
             model: root.sinks
             delegate: MenuItem {
+                id: sinkItem
                 required property PwNode modelData
                 icon: modelData === root.sink ? Theme.icons.check : ""
                 label: modelData.description || modelData.nickname || modelData.name
                 onClicked: Pipewire.preferredDefaultAudioSink = modelData
+
+                // ホバーで詳細（パネルの右側に表示）
+                LazyLoader {
+                    active: sinkItem.hovered
+                    Tooltip {
+                        target: sinkItem
+                        text: root.sinkInfo(sinkItem.modelData)
+                        anchor.rect.width: sinkItem.width + 8
+                        anchor.rect.height: sinkItem.height
+                        anchor.edges: Edges.Right
+                        anchor.gravity: Edges.Right
+                    }
+                }
             }
         }
     }
