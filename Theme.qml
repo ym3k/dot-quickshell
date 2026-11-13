@@ -16,30 +16,35 @@ Singleton {
     readonly property var bases: ({
         teal: {
             label: "Teal",
+            border: ["rgba(33ccffee)", "rgba(00ffcce0)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d90e1514", c: "#1a2120", ch: "#252b2a", fg: "#dde4e2", sub: "#bec9c7", outline: "#3f4948",
             p: "#80d5cf", op: "#003735", pc: "#00504c", opc: "#9cf2eb", sc: "#324b49", osc: "#cce8e5",
             popup: "#f50e1514"
         },
         blue: {
             label: "Blue",
+            border: ["rgba(4d9fffee)", "rgba(33ccffee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d9111318", c: "#1d2024", ch: "#272a2f", fg: "#e2e2e9", sub: "#c4c6d0", outline: "#43474e",
             p: "#a8c8ff", op: "#05305f", pc: "#254777", opc: "#d6e3ff", sc: "#3e4759", osc: "#dae2f9",
             popup: "#f5111318"
         },
         rose: {
             label: "Rose",
+            border: ["rgba(ff6fa8ee)", "rgba(ffb36bee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d9191113", c: "#261d1f", ch: "#31282a", fg: "#f0dee0", sub: "#d5c2c5", outline: "#524345",
             p: "#ffb1c3", op: "#5e1130", pc: "#7b2946", opc: "#ffd9e0", sc: "#5a3f45", osc: "#ffd9e0",
             popup: "#f5191113"
         },
         orange: {
             label: "Orange",
+            border: ["rgba(ff8c3aee)", "rgba(ffd23fee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d919120c", c: "#271e18", ch: "#322822", fg: "#f0dfd6", sub: "#d7c3b8", outline: "#52443c",
             p: "#ffb68a", op: "#522300", pc: "#74390f", opc: "#ffdbc8", sc: "#5b4134", osc: "#ffdbc8",
             popup: "#f519120c"
         },
         lavender: {
             label: "Lavender",
+            border: ["rgba(a78bffee)", "rgba(ff7ad9ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d9141318", c: "#211f26", ch: "#2b2930", fg: "#e6e0e9", sub: "#cac4d0", outline: "#49454f",
             p: "#d0bcff", op: "#381e72", pc: "#4f378b", opc: "#eaddff", sc: "#4a4458", osc: "#e8def8",
             popup: "#f5141318"
@@ -47,6 +52,7 @@ Singleton {
         // ダークの白系（アクセントがグレーがかった白）
         smoke: {
             label: "Smoke",
+            border: ["rgba(f2f0edee)", "rgba(8a8d93ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d9131313", c: "#1f1f1f", ch: "#2a2a2a", fg: "#e6e4e1", sub: "#b5b2ad", outline: "#444240",
             p: "#d6d3cf", op: "#1e1d1c", pc: "#3f3d3b", opc: "#ece9e5", sc: "#33312f", osc: "#dedad5",
             popup: "#f5131313"
@@ -54,6 +60,7 @@ Singleton {
         // waybar の style.css そのままの配色
         legacy: {
             label: "Legacy",
+            border: ["rgba(33ccffee)", "rgba(00ff99ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#bf2b303b", c: "#0fffffff", ch: "#24ffffff", fg: "#ffffff", sub: "#9aa5b1", outline: "#8064727d",
             p: "#2980b9", op: "#ffffff", pc: "#64727D", opc: "#ffffff", sc: "transparent", osc: "#ffffff",
             popup: "#f52b303b",
@@ -97,6 +104,30 @@ Singleton {
         if (!bases[name]) return;
         base = name;
         baseStore.setText(name);
+        writeHyprBorder();
+    }
+
+    // ── Hyprland のウィンドウ枠（アクティブ）をテーマに合わせる ──
+    // ~/.config/hypr/qs-border.lua を書き出し、hyprctl reload で反映する
+    function writeHyprBorder() {
+        const c = b.border ?? bases.legacy.border;
+        borderFile.setText(`-- Quickshell のテーマ切り替えで自動生成（手で編集しない）
+return { colors = { "${c[0]}", "${c[1]}" }, angle = 45 }
+`);
+        borderReload.restart();
+    }
+
+    FileView {
+        id: borderFile
+        path: Quickshell.env("HOME") + "/.config/hypr/qs-border.lua"
+        printErrors: false
+    }
+
+    // 書き込みが終わってから reload する
+    Timer {
+        id: borderReload
+        interval: 300
+        onTriggered: Quickshell.execDetached(["hyprctl", "reload"])
     }
 
     FileView {
