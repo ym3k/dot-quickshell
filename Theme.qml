@@ -86,7 +86,7 @@ Singleton {
 
     // モジュールの色分け（案 D の淡いトーン）。legacy 以外のベースで共通
     readonly property var tints: ({
-        critical: "#e5484d", criticalFg: "#ffffff",   // 警告（CPU・温度・電池・urgent など）。はっきりした赤に白文字
+        critical: "#ffb4ab", criticalFg: "#690005",   // 警告（CPU・温度・電池・urgent など）
         performance: "#442628", performanceFg: "#f5b5b0",   // 電源プロファイル performance（ほかのモジュールと同じ淡いトーンの赤）
         pulseaudio: "#3d3420", pulseaudioFg: "#f5d98a", pulseaudioHover: "#52462b",
         network: "#1f3346", networkFg: "#a8cdf0",
