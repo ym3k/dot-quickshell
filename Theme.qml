@@ -52,7 +52,7 @@ Singleton {
         // ダークの白系（アクセントがグレーがかった白）
         smoke: {
             label: "Smoke",
-            border: ["rgba(33ccffee)", "rgba(00ff99ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
+            border: ["rgba(f2f0edee)", "rgba(8a8d93ee)"],   // Hyprland のアクティブ枠（白 → グレー）
             bar: "#d9131313", c: "#1f1f1f", ch: "#2a2a2a", fg: "#e6e4e1", sub: "#b5b2ad", outline: "#444240",
             p: "#d6d3cf", op: "#1e1d1c", pc: "#3f3d3b", opc: "#ece9e5", sc: "#33312f", osc: "#dedad5",
             popup: "#f5131313"
@@ -109,8 +109,25 @@ Singleton {
 
     // ── Hyprland のウィンドウ枠（アクティブ）をテーマに合わせる ──
     // ~/.config/hypr/qs-border.lua を書き出し、hyprctl reload で反映する
+    // syncBorder が false のときは、テーマに関係なくデフォルトの色にする
+    readonly property var defaultBorder: ["rgba(33ccffee)", "rgba(00ff99ee)"]
+    property bool syncBorder: true
+
+    function setSyncBorder(on) {
+        syncBorder = on;
+        syncStore.setText(on ? "on" : "off");
+        writeHyprBorder();
+    }
+
+    FileView {
+        id: syncStore
+        path: Quickshell.statePath("theme-border-sync")
+        printErrors: false
+        onLoaded: theme.syncBorder = text().trim() !== "off"
+    }
+
     function writeHyprBorder() {
-        const c = b.border ?? bases.legacy.border;
+        const c = syncBorder ? (b.border ?? defaultBorder) : defaultBorder;
         borderFile.setText(`-- Quickshell のテーマ切り替えで自動生成（手で編集しない）
 return { colors = { "${c[0]}", "${c[1]}" }, angle = 45 }
 `);

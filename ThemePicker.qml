@@ -76,4 +76,65 @@ ColumnLayout {
             }
         }
     }
+
+    // ── ウィンドウ枠をテーマに合わせるか ──
+    Rectangle {
+        Layout.fillWidth: true
+        Layout.topMargin: 4
+        Layout.bottomMargin: 4
+        implicitHeight: 1
+        color: Theme.surfaceHover
+    }
+
+    Rectangle {
+        Layout.fillWidth: true
+        implicitHeight: 30
+        radius: Theme.radius
+        color: syncMouse.containsMouse ? Theme.surfaceHover : "transparent"
+        Behavior on color { ColorAnimation { duration: Theme.animMs } }
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
+            spacing: 10
+
+            Text {
+                Layout.fillWidth: true
+                text: "Window border"
+                color: Theme.fg
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+            }
+
+            // スイッチ（オン: テーマに合わせる / オフ: デフォルトの色）
+            Rectangle {
+                id: sw
+                readonly property bool on: Theme.syncBorder
+                implicitWidth: 32
+                implicitHeight: 18
+                radius: 9
+                color: on ? Theme.accent : Theme.surfaceHover
+                Behavior on color { ColorAnimation { duration: Theme.animMs } }
+
+                Rectangle {
+                    width: 12
+                    height: 12
+                    radius: 6
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: sw.on ? parent.width - width - 3 : 3
+                    color: sw.on ? Theme.onAccent : Theme.subtle
+                    Behavior on x { NumberAnimation { duration: Theme.animMs } }
+                }
+            }
+        }
+
+        MouseArea {
+            id: syncMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: Theme.setSyncBorder(!Theme.syncBorder)   // メニューは閉じない
+        }
+    }
 }
