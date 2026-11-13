@@ -16,14 +16,14 @@ Singleton {
     readonly property var bases: ({
         teal: {
             label: "Teal",
-            border: ["rgba(33ccffee)", "rgba(00ffcce0)"],   // Hyprland のアクティブ枠（45° グラデーション）
+            border: ["rgba(33ccffee)", "rgba(00ff99ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d90e1514", c: "#1a2120", ch: "#252b2a", fg: "#dde4e2", sub: "#bec9c7", outline: "#3f4948",
             p: "#80d5cf", op: "#003735", pc: "#00504c", opc: "#9cf2eb", sc: "#324b49", osc: "#cce8e5",
             popup: "#f50e1514"
         },
         blue: {
             label: "Blue",
-            border: ["rgba(4d9fffee)", "rgba(33ccffee)"],   // Hyprland のアクティブ枠（45° グラデーション）
+            border: ["rgba(33ccffee)", "rgba(00ff99ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d9111318", c: "#1d2024", ch: "#272a2f", fg: "#e2e2e9", sub: "#c4c6d0", outline: "#43474e",
             p: "#a8c8ff", op: "#05305f", pc: "#254777", opc: "#d6e3ff", sc: "#3e4759", osc: "#dae2f9",
             popup: "#f5111318"
@@ -52,7 +52,7 @@ Singleton {
         // ダークの白系（アクセントがグレーがかった白）
         smoke: {
             label: "Smoke",
-            border: ["rgba(f2f0edee)", "rgba(8a8d93ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
+            border: ["rgba(33ccffee)", "rgba(00ff99ee)"],   // Hyprland のアクティブ枠（45° グラデーション）
             bar: "#d9131313", c: "#1f1f1f", ch: "#2a2a2a", fg: "#e6e4e1", sub: "#b5b2ad", outline: "#444240",
             p: "#d6d3cf", op: "#1e1d1c", pc: "#3f3d3b", opc: "#ece9e5", sc: "#33312f", osc: "#dedad5",
             popup: "#f5131313"
