@@ -221,9 +221,10 @@ ShellRoot {
         objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
     }
 
+    // 時計。Seconds にしておくと、サスペンド復帰後も 1 秒以内に正しい時刻になる
     SystemClock {
         id: clock
-        precision: SystemClock.Minutes
+        precision: SystemClock.Seconds
     }
 
     Variants {
