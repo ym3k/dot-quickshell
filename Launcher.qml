@@ -199,18 +199,94 @@ PanelWindow {
         close();
     }
 
+    // ───────────── 電卓（Apps モードで数式を入力すると先頭に答えを出す） ─────────────
+    // eval は使わず、四則演算・累乗・関数だけを解釈する小さなパーサーで計算する
+    readonly property var calcFuncs: ({
+        sqrt: Math.sqrt, abs: Math.abs, round: Math.round, floor: Math.floor, ceil: Math.ceil,
+        sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan,
+        log: Math.log10, ln: Math.log, exp: Math.exp
+    })
+    readonly property var calcConsts: ({ pi: Math.PI, e: Math.E })
+
+    function calc(src) {
+        const text = src.trim().toLowerCase().replace(/×/g, "*").replace(/÷/g, "/").replace(/\*\*/g, "^");
+        // 数式らしいものだけ（数字と、演算子か関数を含む）。ただの数字やアプリ名では出さない
+        if (!/[0-9]/.test(text) && !/\b(pi|e)\b/.test(text)) return null;
+        if (!/[-+*/%^()]/.test(text)) return null;
+
+        const tokens = text.match(/\d+\.?\d*|\.\d+|[a-z]+|[-+*/%^()]|\S/g) ?? [];
+        let pos = 0;
+        const peek = () => tokens[pos];
+        const next = () => tokens[pos++];
+
+        function expr() {                       // 足し算・引き算
+            let v = term();
+            while (peek() === "+" || peek() === "-") v = next() === "+" ? v + term() : v - term();
+            return v;
+        }
+        function term() {                       // 掛け算・割り算・余り
+            let v = power();
+            while (peek() === "*" || peek() === "/" || peek() === "%") {
+                const op = next(), r = power();
+                v = op === "*" ? v * r : op === "/" ? v / r : v % r;
+            }
+            return v;
+        }
+        function power() {                      // 累乗（右から計算）
+            const b = unary();
+            if (peek() === "^") { next(); return Math.pow(b, power()); }
+            return b;
+        }
+        function unary() {
+            if (peek() === "-") { next(); return -unary(); }
+            if (peek() === "+") { next(); return unary(); }
+            return primary();
+        }
+        function primary() {
+            const t = next();
+            if (t === undefined) throw "end";
+            if (t === "(") { const v = expr(); if (next() !== ")") throw "paren"; return v; }
+            if (/^[\d.]/.test(t)) return parseFloat(t);
+            if (root.calcConsts[t] !== undefined) return root.calcConsts[t];
+            if (root.calcFuncs[t]) {
+                if (next() !== "(") throw "func";
+                const v = expr();
+                if (next() !== ")") throw "paren";
+                return root.calcFuncs[t](v);
+            }
+            throw "token";
+        }
+
+        try {
+            const v = expr();
+            if (pos !== tokens.length || !isFinite(v)) return null;
+            return String(Number(v.toPrecision(12)));   // 浮動小数の誤差（0.1+0.2 など）を丸める
+        } catch (e) {
+            return null;
+        }
+    }
+
+    readonly property var calcResult: mode === "apps" ? calc(query) : null
+
+    function copyCalc() {
+        if (calcResult === null) return;
+        Quickshell.execDetached(["wl-copy", calcResult]);
+        close();
+    }
+
     // ───────────── 共通 ─────────────
     readonly property int count: mode === "apps" ? appResults.length
                                : mode === "emoji" ? emojiResults.length
                                : runResults.length
 
     function move(d) {
-        const min = mode === "run" ? -1 : 0;
+        const min = mode === "run" || (mode === "apps" && calcResult !== null) ? -1 : 0;
         current = Math.max(min, Math.min(count - 1, current + d));
     }
 
     function activate(shift) {
-        if (mode === "apps") launchApp(appResults[current]);
+        if (mode === "apps" && current < 0) copyCalc();
+        else if (mode === "apps") launchApp(appResults[current]);
         else if (mode === "emoji") pickEmoji(emojiResults[current]);
         else runCommand(current >= 0 ? runResults[current] : input.text, shift);
     }
@@ -321,7 +397,7 @@ PanelWindow {
 
                     onTextChanged: {
                         root.query = text;
-                        root.current = root.mode === "run" ? -1 : 0;
+                        root.current = root.mode === "run" || (root.mode === "apps" && root.calcResult !== null) ? -1 : 0;
                     }
 
                     Keys.onPressed: e => {
@@ -340,12 +416,59 @@ PanelWindow {
                     Text {
                         visible: input.text === ""
                         anchors.verticalCenter: parent.verticalCenter
-                        text: root.mode === "apps" ? "Search apps…"
+                        text: root.mode === "apps" ? "Search apps…  or calculate (12*34, sqrt(2)^3)"
                             : root.mode === "emoji" ? "Search emoji (english)…"
                             : "Run in kitty + fish…   (Shift+Enter: keep open)"
                         color: Theme.subtle
                         font: input.font
                     }
+                }
+            }
+
+            // ── 電卓の答え ──
+            Rectangle {
+                visible: root.calcResult !== null
+                Layout.fillWidth: true
+                implicitHeight: 48
+                radius: Theme.radius
+                color: root.current < 0 ? Theme.surfaceHover : "transparent"
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 12
+
+                    Text {
+                        Layout.preferredWidth: 26
+                        horizontalAlignment: Text.AlignHCenter
+                        text: "\uf1ec"    // 電卓
+                        color: Theme.accent
+                        font.family: Theme.iconFontFamily
+                        font.pixelSize: Theme.fontSize + 6
+                    }
+                    Text {
+                        text: "= " + (root.calcResult ?? "")
+                        color: Theme.fg
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize + 6
+                        font.bold: true
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignRight
+                        text: "Enter: copy"
+                        color: Theme.subtle
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize - 1
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: root.current = -1
+                    onClicked: root.copyCalc()
                 }
             }
 
