@@ -12,6 +12,7 @@ ShellRoot {
     id: root
 
     property bool idleInhibit: false
+    property bool analogClock: false   // アナログ時計ウィンドウの表示
     property string submap: ""
 
     component ClipboardPanel: ColumnLayout {
@@ -225,6 +226,14 @@ ShellRoot {
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
+    }
+
+    // アナログ時計（Hyprland の通常ウィンドウ。window rule で float にする）
+    LazyLoader {
+        active: root.analogClock
+        AnalogClock {
+            onVisibleChanged: if (!visible) root.analogClock = false   // ウィンドウを閉じたら状態も戻す
+        }
     }
 
     Variants {
@@ -452,7 +461,11 @@ ShellRoot {
                         label: Qt.formatDateTime(clock.date, "yyyy-MM-dd\u2009hh:mm")
                         bg: Theme.clock
                         fg: Theme.clockFg
-                        onClicked: win.toggle("calendar")
+                        // 左: カレンダー、右: アナログ時計
+                        onClicked: button => {
+                            if (button === Qt.RightButton) root.analogClock = !root.analogClock;
+                            else win.toggle("calendar");
+                        }
                     }
 
                     BarModule {
