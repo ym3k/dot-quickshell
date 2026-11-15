@@ -13,6 +13,27 @@ ShellRoot {
 
     property bool idleInhibit: false
     property bool analogClock: false   // アナログ時計ウィンドウの表示
+
+    // ── スクリプトから操作するための IPC（デモ用） ──
+    //   qs ipc call bar open calendar   … パネルを開く（calendar / audio / wifi / media / clipboard / theme）
+    //   qs ipc call bar close           … パネルを閉じる
+    //   qs ipc call bar clock           … アナログ時計の表示/非表示
+    //   qs ipc call bar theme rose      … テーマの切り替え
+    property string popupRequest: ""
+    property int popupSerial: 0
+
+    function requestPopup(name) {
+        popupRequest = name;
+        popupSerial++;   // 同じ名前を続けて要求しても通知されるように
+    }
+
+    IpcHandler {
+        target: "bar"
+        function open(name: string): void { root.requestPopup(name); }
+        function close(): void { root.requestPopup(""); }
+        function clock(): void { root.analogClock = !root.analogClock; }
+        function theme(name: string): void { Theme.setBase(name); }
+    }
     property string submap: ""
 
     component ClipboardPanel: ColumnLayout {
@@ -273,6 +294,16 @@ ShellRoot {
             property string openPopup: ""   // 開いているポップアップ名（1 つだけ）
             property var trayItem: null     // メニューを開いているトレイアイテム
             property Item trayTarget: null  // メニューの表示位置（トレイのアイコン）
+
+            // IPC からのパネル要求は、フォーカス中のモニターのバーだけが受け取る
+            Connections {
+                target: root
+                function onPopupSerialChanged() {
+                    if (win.modelData.name !== Hyprland.focusedMonitor?.name) return;
+                    if (root.popupRequest === "theme") themeAnchor.x = bar.width / 2;
+                    win.openPopup = root.popupRequest;
+                }
+            }
 
             function toggle(name) {
                 openPopup = openPopup === name ? "" : name;

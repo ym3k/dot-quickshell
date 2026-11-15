@@ -70,6 +70,7 @@ Singleton {
                 muted: "#90b1b1", mutedFg: "#2a5c45",
                 battery: "#ffffff", batteryFg: "#000000",
                 critical: "#eb4d4b", criticalFg: "#ffffff",
+                performance: "#f53c3c", performanceFg: "#ffffff",   // waybar の custom-power-profile.performance
                 pulseaudio: "#f1c40f", pulseaudioFg: "#000000", pulseaudioHover: "#a37800",
                 network: "#2980b9", networkFg: "#ffffff",
                 cpu: "#2ecc71", cpuFg: "#000000",
